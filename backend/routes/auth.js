@@ -58,7 +58,7 @@ router.post('/request-otp', async (req, res) => {
       const resend = new Resend(process.env.RESEND_API_KEY);
       try {
         await resend.emails.send({
-          from: 'QuickPipe <onboarding@resend.dev>',
+          from: 'QuickPipe <quickpipe@nikhim.me>',
           to: normalizedEmail,
           subject: 'Your QuickPipe Verification Code',
           html: `

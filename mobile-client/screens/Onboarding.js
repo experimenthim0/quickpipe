@@ -9,7 +9,8 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Linking
+  Linking,
+  Image
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { saveSecureKey } from '../utils/secureStore';
@@ -97,11 +98,12 @@ export default function Onboarding({ onAuthSuccess }) {
           {/* ── Main auth card ── */}
           <View className="w-full max-w-[360px] bg-cardglass rounded-3xl p-6 border border-slate-800/80 items-center">
             {/* App branding */}
-            <View className="p-3 bg-slate-900/60 border border-slate-850 rounded-2xl mb-4">
-              <Feather name="link-2" size={32} color="#00F2FE" />
-            </View>
+             <Image
+              source={{ uri: 'https://raw.githubusercontent.com/experimenthim0/quickpipe/main/chrome-extension/icon128.png' }}
+              className="w-16 h-16 rounded-xl mb-2"
+            />
             <Text className="text-2xl font-bold text-white tracking-tight">QuickPipe</Text>
-            <Text className="text-xs text-slatemuted text-center mt-1.5 mb-6 leading-relaxed">
+            <Text className="text-xs text-neutral-300 text-center mt-1.5 mb-6 leading-relaxed">
               Minimalist cross-device link sync pipeline
             </Text>
 
@@ -111,11 +113,11 @@ export default function Onboarding({ onAuthSuccess }) {
 
             {step === 'request' ? (
               <View className="w-full">
-                <Text className="text-[10px] font-bold text-cyanaccent mb-1.5 uppercase tracking-wider">Email Address</Text>
+                <Text className="text-[13px] font-bold text-cyanaccent mb-1.5 uppercase tracking-wider">Email Address</Text>
                 <TextInput
-                  className="w-full h-12 border border-slate-800 rounded-xl px-4 text-sm text-white bg-slate-950/60 mb-4 focus:border-cyanaccent"
-                  placeholder="name@domain.com"
-                  placeholderTextColor="#475569"
+                  className="w-full h-12 border border-slate-600 rounded-xl px-4 text-sm text-white bg-slate-950/60 mb-4 focus:border-cyanaccent"
+                  placeholder="aaash@nikhim.me"
+                  placeholderTextColor="#838d9c"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -140,7 +142,7 @@ export default function Onboarding({ onAuthSuccess }) {
                 <TextInput
                   className="w-full h-12 border border-slate-800 rounded-xl px-4 text-sm text-cyanaccent bg-slate-950/60 mb-4 tracking-[4px] text-center font-bold focus:border-cyanaccent"
                   placeholder="123456"
-                  placeholderTextColor="#475569"
+                  placeholderTextColor="#838d9c"
                   keyboardType="number-pad"
                   maxLength={6}
                   autoFocus={true}
@@ -166,9 +168,9 @@ export default function Onboarding({ onAuthSuccess }) {
                   <Feather name="arrow-left" size={14} color="#64748b" />
                   <Text className="text-slatemuted text-xs font-semibold ml-1.5">Edit Email</Text>
                 </TouchableOpacity>
-                <Text className="text-[10px] text-slatemuted text-center mt-6 leading-relaxed">
+                {/* <Text className="text-[10px] text-slatemuted text-center mt-6 leading-relaxed">
                   A security code was printed to the QuickPipe Server logs.
-                </Text>
+                </Text> */}
               </View>
             )}
           </View>
@@ -183,7 +185,7 @@ export default function Onboarding({ onAuthSuccess }) {
                 </View>
                 <View>
                   <Text className="text-[11px] font-bold text-white">Nikhil Yadav</Text>
-                  <Text className="text-[9px] text-slatemuted mt-0.5">Developer & Maintainer</Text>
+                  <Text className="text-[9px] text-neutral-300 mt-0.5">Developer & Maintainer</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -195,17 +197,29 @@ export default function Onboarding({ onAuthSuccess }) {
               </TouchableOpacity>
             </View>
 
-            {/* Open source pill */}
-            <TouchableOpacity
-              onPress={() => Linking.openURL('https://github.com')}
-              className="flex-row items-center justify-center bg-slate-950/60 border border-slate-800/60 rounded-2xl px-4 py-2.5 active:bg-slate-900"
-            >
-              <Feather name="github" size={11} color="#64748b" />
-              <Text className="text-[10px] text-slatemuted font-semibold ml-1.5">Open Source</Text>
-              <View className="w-[1px] h-3 bg-slate-800 mx-2.5" />
-              <Feather name="heart" size={10} color="#ef4444" />
-              <Text className="text-[10px] text-slatemuted font-semibold ml-1.5">Free to self-host</Text>
-            </TouchableOpacity>
+            {/* Download Extension & OSS pills */}
+            <View className="flex-col gap-2 mt-1">
+              <TouchableOpacity
+                onPress={() => Linking.openURL('https://github.com/experimenthim0/quickpipe')}
+                className="flex-row items-center justify-center bg-slate-950/60 border border-slate-800/60 rounded-2xl px-4 py-2.5 active:bg-slate-900"
+              >
+                <Feather name="chrome" size={11} color="#00F2FE" />
+                <Text className="text-[10px] text-cyanaccent font-bold ml-1.5">Get Chrome Extension from GitHub</Text>
+                <View className="w-[1px] h-3 bg-slate-800 mx-2.5" />
+                <Feather name="download" size={10} color="#00F2FE" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => Linking.openURL('https://github.com/experimenthim0/quickpipe')}
+                className="flex-row items-center justify-center bg-slate-950/60 border border-slate-800/60 rounded-2xl px-4 py-2.5 active:bg-slate-900"
+              >
+                <Feather name="github" size={11} color="white" />
+                <Text className="text-[10px] text-neutral-300 font-semibold ml-1.5">View Source Code on GitHub</Text>
+                <View className="w-[1px] h-3 bg-slate-800 mx-2.5" />
+                <Feather name="heart" size={10} color="#ef4444" />
+                <Text className="text-[10px] text-neutral-300 font-semibold ml-1.5">Free to self-host</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
         </View>

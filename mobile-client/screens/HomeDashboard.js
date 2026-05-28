@@ -11,7 +11,8 @@ import {
   SafeAreaView,
   Platform,
   Alert,
-  ScrollView
+  ScrollView,
+  Image
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { deleteSecureKey } from '../utils/secureStore';
@@ -263,8 +264,8 @@ export default function HomeDashboard({ syncKey, onLogout }) {
 
           {/* Card metadata (device & time) */}
           <View className="flex-row items-center mt-2.5">
-            <View className="bg-slate-950/60 border border-slate-900 rounded px-1.5 py-0.5 mr-2">
-              <Text className="text-[9px] font-bold text-slatemuted uppercase tracking-wide">
+            <View className="bg-slate-950/60 border border-slate-600 rounded px-1.5 py-0.5 mr-2">
+              <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-wide">
                 {item.sourceDevice}
               </Text>
             </View>
@@ -302,7 +303,7 @@ export default function HomeDashboard({ syncKey, onLogout }) {
           {/* Top Navigation */}
           <View className="flex-row justify-between items-center px-4 py-4 border-b border-slate-900 bg-darkspace">
             <View className="flex-row items-center">
-              <Text className="text-lg font-bold text-white tracking-tight">QuickPipe</Text>
+              <Text className="text-2xl font-bold text-white tracking-tight">QuickPipe</Text>
               {/* <View className="w-1.5 h-1.5 rounded-full bg-cyanaccent ml-1" /> */}
             </View>
             <TouchableOpacity 
@@ -315,12 +316,12 @@ export default function HomeDashboard({ syncKey, onLogout }) {
           </View>
 
           {/* Search Input Bar */}
-          <View className="flex-row items-center mx-4 mt-4 mb-3 px-3 bg-slate-950/60 border border-slate-800 rounded-xl h-11 focus:border-cyanaccent">
+          <View className="flex-row items-center mx-4 mt-4 mb-3 px-3 bg-slate-950/60 border border-slate-600 rounded-xl h-11 focus:border-cyanaccent">
             <Feather name="search" size={14} color="#64748B" />
             <TextInput
               className="flex-1 h-full text-sm text-white ml-2 bg-transparent"
               placeholder="Search feed..."
-              placeholderTextColor="#475569"
+              placeholderTextColor="#838d9c"
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoCorrect={false}
@@ -358,6 +359,22 @@ export default function HomeDashboard({ syncKey, onLogout }) {
                     <Text className="text-xs text-slatemuted text-center leading-normal max-w-[240px]">
                       Links pushed from other devices will display here.
                     </Text>
+                    
+                    <TouchableOpacity
+                      onPress={() => Linking.openURL('https://github.com/experimenthim0/quickpipe')}
+                      className="py-2.5 px-5 bg-slate-950/60 border border-cyanaccent/30 rounded-xl items-center active:bg-slate-900 mb-3 flex-row justify-center"
+                    >
+                      <Feather name="chrome" size={14} color="#00F2FE" />
+                      <Text className="text-cyanaccent text-xs font-bold ml-2">Get Chrome Extension from GitHub</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => Linking.openURL('https://github.com/experimenthim0/quickpipe')}
+                      className="py-2.5 px-5 bg-slate-950/60 border border-slate-800 rounded-xl items-center active:bg-slate-900 flex-row justify-center"
+                    >
+                      <Feather name="github" size={14} color="#64748b" />
+                      <Text className="text-slate-300 text-xs font-semibold ml-2">View Source Code on GitHub</Text>
+                    </TouchableOpacity>
                   </View>
                 }
               />
@@ -372,9 +389,9 @@ export default function HomeDashboard({ syncKey, onLogout }) {
               className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl active:bg-slate-900 mr-3" 
               onPress={() => setCurrentView('feed')}
             >
-              <Feather name="arrow-left" size={16} color="#00F2FE" />
+              <Feather name="arrow-left" size={20} color="#00F2FE" />
             </TouchableOpacity>
-            <Text className="text-lg font-bold text-white tracking-tight">Manage Pipeline</Text>
+            <Text className="text-2xl font-bold text-white tracking-tight">Manage Pipeline</Text>
           </View>
 
           {/* Manage Options Scroll */}
@@ -431,11 +448,11 @@ export default function HomeDashboard({ syncKey, onLogout }) {
 
             {/* Disconnect action */}
             <TouchableOpacity 
-              className="mt-8 h-12 border border-red-950/40 bg-red-950/10 rounded-xl justify-center items-center active:bg-red-950/20"
+              className="mt-8  h-12 border border-red-700 bg-red-950/10 rounded-xl justify-center items-center active:bg-red-950/20"
               onPress={handleLogoutPress}
             >
               <View className="flex-row items-center">
-                <Feather name="log-out" size={14} color="#ef4444" className="mr-1.5" />
+                <Feather name="log-out" size={16} color="#ef4444" className="mr-1.5" />
                 <Text className="text-red-400 text-sm font-semibold">Disconnect Device</Text>
               </View>
             </TouchableOpacity>
@@ -444,8 +461,12 @@ export default function HomeDashboard({ syncKey, onLogout }) {
             <View className="mt-8 mb-8 p-6 bg-cardglass border border-slate-800/80 rounded-3xl">
   {/* Header */}
   <View className="items-center mb-6">
-    <View className="p-3 bg-slate-950/60 border border-slate-900 rounded-2xl mb-3">
-      <Feather name="send" size={24} color="#00F2FE" />
+    <View className="p-3 border border-slate-900 rounded-2xl mb-3">
+      {/* <Feather name="send" size={24} color="#00F2FE" /> */}
+      <Image
+  source={{ uri: 'https://raw.githubusercontent.com/experimenthim0/quickpipe/main/chrome-extension/icon128.png' }}
+  className="w-16 h-16 rounded-xl"
+/>
     </View>
     <Text className="text-xl font-bold text-white tracking-tight">QuickPipe</Text>
     <Text className="text-[10px] font-bold text-slatemuted uppercase tracking-wider mt-1 bg-slate-900 border border-slate-800/60 rounded-full px-2.5 py-0.5">
@@ -462,9 +483,9 @@ export default function HomeDashboard({ syncKey, onLogout }) {
   <View>
     <View className="flex-row items-center mb-2.5">
       <Feather name="compass" size={14} color="#00F2FE" />
-      <Text className="text-xs font-bold text-cyanaccent uppercase tracking-wider ml-2">The Mission</Text>
+      <Text className="text-sm font-bold text-cyanaccent uppercase tracking-wider ml-2">The Mission</Text>
     </View>
-    <Text className="text-xs text-slate-300 leading-relaxed">
+    <Text className="text-sm text-slate-300 leading-relaxed">
       QuickPipe was born out of a simple, daily frustration: the annoying friction of messaging yourself on WhatsApp just to move a link or text snippet between your laptop and your phone.{"\n\n"}
       We stripped away the heavy bloat of traditional device sync tools to build a dedicated, lightning-fast data pipeline that protects your focus and logs your history in a clean, searchable feed.
     </Text>
@@ -476,7 +497,7 @@ export default function HomeDashboard({ syncKey, onLogout }) {
   <View>
     <View className="flex-row items-center mb-3">
       <Feather name="layers" size={14} color="#00F2FE" />
-      <Text className="text-xs font-bold text-cyanaccent uppercase tracking-wider ml-2">Architecture</Text>
+      <Text className="text-sm font-bold text-cyanaccent uppercase tracking-wider ml-2">Architecture</Text>
     </View>
     <View>
       <View className="flex-row items-center bg-slate-950/40 border border-slate-900/60 p-2.5 rounded-xl mb-2">
@@ -500,11 +521,11 @@ export default function HomeDashboard({ syncKey, onLogout }) {
   <View>
     <View className="flex-row items-center mb-2.5">
       <Feather name="code" size={14} color="#00F2FE" />
-      <Text className="text-xs font-bold text-cyanaccent uppercase tracking-wider ml-2">Developed By</Text>
+      <Text className="text-sm font-bold text-cyanaccent uppercase tracking-wider ml-2">Developed By</Text>
     </View>
     <View className="bg-slate-950/40 border border-slate-900/60 p-3.5 rounded-xl">
-      <Text className="text-sm font-bold text-white">Nikhil Yadav</Text>
-      <Text className="text-xs text-slate-400 italic mt-3 border-l-2 border-slate-800 pl-2.5">
+      <Text className="text-md font-bold text-white">Nikhil Yadav</Text>
+      <Text className="text-sm text-slate-400 italic mt-3 border-l-2 border-slate-800 pl-2.5">
         "Building tools at the intersection of infrastructure, automation, and clean code."
       </Text>
       <TouchableOpacity
@@ -524,25 +545,61 @@ export default function HomeDashboard({ syncKey, onLogout }) {
   <View>
     <View className="flex-row items-center mb-2.5">
       <Feather name="users" size={14} color="#00F2FE" />
-      <Text className="text-xs font-bold text-cyanaccent uppercase tracking-wider ml-2">Open Source Community</Text>
+      <Text className="text-sm font-bold text-cyanaccent uppercase tracking-wider ml-2">Open Source Community</Text>
     </View>
-    <Text className="text-xs text-slate-300 leading-relaxed mb-4">
+    <Text className="text-sm text-slate-300 leading-relaxed mb-4">
       QuickPipe is completely open source and built for the developer community. Want to host your own backend, add a new browser port, or contribute a feature?
     </Text>
 
     <TouchableOpacity
-      onPress={() => Linking.openURL('https://github.com')}
+      onPress={() => Linking.openURL('https://chromewebstore.google.com/')}
+      className="py-3 bg-slate-950/60 border border-cyanaccent/30 rounded-xl items-center active:bg-slate-900 mb-2 flex-row justify-center"
+    >
+      <Feather name="chrome" size={14} color="#00F2FE" />
+      <Text className="text-cyanaccent text-xs font-bold ml-2">Download Chrome Extension</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      onPress={() => Linking.openURL('https://github.com/experimenthim0/quickpipe/releases')}
+      className="py-3 bg-slate-950/60 border border-slate-800 rounded-xl items-center active:bg-slate-900 mb-2 flex-row justify-center"
+    >
+      <Feather name="download" size={14} color="#00F2FE" />
+      <Text className="text-cyanaccent text-xs font-bold ml-2">Download Extension (GitHub)</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      onPress={() => Linking.openURL('https://github.com/experimenthim0/quickpipe')}
       className="py-3 bg-slate-950/60 border border-slate-800 rounded-xl items-center active:bg-slate-900 mb-2 flex-row justify-center"
     >
       <Feather name="github" size={14} color="#00F2FE" />
       <Text className="text-cyanaccent text-xs font-bold ml-2">View Repository on GitHub</Text>
     </TouchableOpacity>
     <TouchableOpacity
-      onPress={() => Linking.openURL('https://github.com')}
+      onPress={() => Linking.openURL('https://github.com/experimenthim0/quickpipe/issues')}
       className="py-3 bg-slate-950/60 border border-slate-800 rounded-xl items-center active:bg-slate-900 flex-row justify-center"
     >
       <Feather name="alert-circle" size={14} color="#00F2FE" />
       <Text className="text-cyanaccent text-xs font-bold ml-2">Report Issue / Request Feature</Text>
+    </TouchableOpacity>
+  </View>
+
+  <View className="h-[1px] bg-slate-800/40 my-5" />
+
+  {/* Support Me */}
+  <View>
+    <View className="flex-row items-center mb-2.5">
+      <Feather name="coffee" size={14} color="#00F2FE" />
+      <Text className="text-sm font-bold text-cyanaccent uppercase tracking-wider ml-2">Support This Project</Text>
+    </View>
+    <Text className="text-sm text-slate-300 leading-relaxed mb-4">
+      QuickPipe is completely free. If you find it useful, please consider supporting the project to help cover backend server costs and future development!
+    </Text>
+    <TouchableOpacity
+      onPress={() => Linking.openURL('https://nikhim.me/supportme')}
+      className="py-3 bg-emerald-950/20 border border-emerald-900/60 rounded-xl items-center active:bg-emerald-900/40 flex-row justify-center"
+    >
+      <Feather name="heart" size={14} color="#34d399" />
+      <Text className="text-emerald-400 text-md font-bold ml-2">Support Me</Text>
     </TouchableOpacity>
   </View>
 
@@ -553,7 +610,7 @@ export default function HomeDashboard({ syncKey, onLogout }) {
     <View className="flex-row items-center justify-center">
       <Feather name="heart" size={12} color="#ef4444" />
       <Text className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-1.5">
-        Made with love
+        Made with love by NikHim
       </Text>
     </View>
   </View>

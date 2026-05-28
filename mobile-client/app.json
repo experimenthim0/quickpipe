@@ -14,7 +14,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.quickpipe.app"
+      "bundleIdentifier": "com.quickpipe.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.quickpipe.app",
@@ -22,6 +25,11 @@
         "android.permission.INTERNET",
         "android.permission.DETECT_SCREEN_CAPTURE"
       ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5fa37b3f-4cbd-4af9-b440-7492e65f8de1"
+      }
     }
   }
 }

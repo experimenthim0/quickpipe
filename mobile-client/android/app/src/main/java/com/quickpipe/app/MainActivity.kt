@@ -2,6 +2,8 @@ package com.quickpipe.app
 
 import android.os.Build
 import android.os.Bundle
+import android.content.Intent
+import android.net.Uri
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -16,7 +18,26 @@ class MainActivity : ReactActivity() {
     // coloring the background, status bar, and navigation bar.
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
+    handleSendIntent(intent)
     super.onCreate(null)
+  }
+
+  override fun onNewIntent(intent: Intent?) {
+    handleSendIntent(intent)
+    super.onNewIntent(intent)
+  }
+
+  private fun handleSendIntent(intent: Intent?) {
+    if (intent != null && intent.action == Intent.ACTION_SEND && intent.type != null) {
+      if (intent.type == "text/plain" || intent.type?.startsWith("text/") == true) {
+        val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
+        if (sharedText != null) {
+          val deepLinkUri = Uri.parse("com.quickpipe.app://share?content=" + Uri.encode(sharedText))
+          intent.data = deepLinkUri
+          intent.action = Intent.ACTION_VIEW
+        }
+      }
+    }
   }
 
   /**

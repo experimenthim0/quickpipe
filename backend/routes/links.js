@@ -223,4 +223,38 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @route   DELETE /api/links/devices/:deviceId
+ * @desc    Unlink/remove a specific device by its deviceId
+ * @access  Public
+ */
+router.delete('/devices/:deviceId', async (req, res) => {
+  try {
+    const { syncKey } = req.query;
+    const { deviceId } = req.params;
+
+    if (!syncKey) {
+      return res.status(400).json({ error: 'syncKey query parameter is required' });
+    }
+
+    const user = await User.findOne({ syncKey });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found or authorization failed' });
+    }
+
+    const initialLength = user.devices.length;
+    user.devices = user.devices.filter(d => d.deviceId !== deviceId);
+
+    if (user.devices.length === initialLength) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+
+    await user.save();
+    return res.status(200).json({ message: 'Device unlinked successfully' });
+  } catch (error) {
+    console.error('[QuickPipe] Error in device delete:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

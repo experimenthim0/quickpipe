@@ -62,6 +62,7 @@ export default function HomeDashboard({ syncKey, onLogout }) {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [currentDeviceId, setCurrentDeviceId] = useState('');
 
   const sections = useMemo(() => groupLinksByDate(links), [links]);
 
@@ -108,6 +109,163 @@ export default function HomeDashboard({ syncKey, onLogout }) {
 
     return () => clearTimeout(timer);
   }, [searchQuery, fetchHistory]);
+
+  /**
+   * Pushes a new link or text snippet to the sync pipeline.
+   */
+  const pushContent = useCallback(async (contentToPush) => {
+    if (!contentToPush || !contentToPush.trim()) return false;
+    try {
+      const deviceId = await getOrCreateMobileDeviceId();
+      const deviceName = getMobileDeviceName();
+
+      const response = await fetch(`${API_BASE_URL}/api/links/push`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          syncKey: syncKey,
+          content: contentToPush.trim(),
+          sourceDevice: 'mobile',
+          deviceId,
+          deviceName,
+          deviceType: 'mobile'
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        triggerFeedbackToast('Pushed successfully! ⚡');
+        fetchHistory(searchQuery);
+        return true;
+      } else {
+        triggerFeedbackToast(`Error: ${data.error || 'Server error'}`);
+        return false;
+      }
+    } catch (error) {
+      console.error('[QuickPipe] Push error:', error);
+      triggerFeedbackToast('Failed to connect to API server.');
+      return false;
+    }
+  }, [syncKey, searchQuery, fetchHistory]);
+
+  const handlePushPress = async () => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length > 0) {
+      const success = await pushContent(trimmed);
+      if (success) {
+        setSearchQuery('');
+      }
+    }
+  };
+
+  // Handle processing of incoming deep links (from Android share intents)
+  const processDeepLink = useCallback(async (url) => {
+    try {
+      if (url.startsWith('com.quickpipe.app://share')) {
+        const queryString = url.split('?')[1];
+        if (!queryString) return;
+        const params = {};
+        queryString.split('&').forEach(param => {
+          const [key, val] = param.split('=');
+          if (key && val) {
+            params[key] = decodeURIComponent(val);
+          }
+        });
+        
+        const content = params['content'];
+        if (content && content.trim()) {
+          await pushContent(content.trim());
+        }
+      }
+    } catch (err) {
+      console.error('[QuickPipe] Error processing deep link:', err);
+    }
+  }, [pushContent]);
+
+  // Setup deep link event listeners
+  useEffect(() => {
+    const handleUrlEvent = (event) => {
+      if (event?.url) {
+        processDeepLink(event.url);
+      }
+    };
+
+    // Check if the app was opened via a deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        processDeepLink(url);
+      }
+    });
+
+    // Listen for incoming URLs while app is in background/foreground
+    const subscription = Linking.addEventListener('url', handleUrlEvent);
+
+    return () => {
+      subscription.remove();
+    };
+  }, [processDeepLink]);
+
+  // Load current device ID on mount
+  useEffect(() => {
+    getOrCreateMobileDeviceId().then(id => setCurrentDeviceId(id));
+  }, []);
+
+  const isDeviceActive = (lastActiveAt) => {
+    const diffMs = Date.now() - new Date(lastActiveAt).getTime();
+    const diffMins = diffMs / (1000 * 60);
+    return diffMins < 15;
+  };
+
+  /**
+   * Unlinks a specific device by deviceId.
+   */
+  const handleRemoveDevice = async (deviceId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/links/devices/${deviceId}?syncKey=${syncKey}`, {
+        method: 'DELETE'
+      });
+      const data = await response.json();
+      if (response.ok) {
+        triggerFeedbackToast('Device unlinked successfully! 🗑️');
+        if (deviceId === currentDeviceId) {
+          await deleteSecureKey();
+          onLogout();
+        } else {
+          fetchHistory(searchQuery);
+        }
+      } else {
+        triggerFeedbackToast(`Error: ${data.error || 'Failed to unlink'}`);
+      }
+    } catch (err) {
+      console.error('[QuickPipe] Failed to remove device:', err);
+      triggerFeedbackToast('Failed to connect to API server.');
+    }
+  };
+
+  const confirmRemoveDevice = (d) => {
+    const isCurrent = d.deviceId === currentDeviceId;
+    const title = isCurrent ? 'Unlink Current Device' : 'Unlink Device';
+    const message = isCurrent 
+      ? 'Are you sure you want to disconnect this device? You will be logged out.'
+      : `Are you sure you want to disconnect ${d.deviceName}?`;
+
+    if (Platform.OS === 'web') {
+      if (confirm(message)) {
+        handleRemoveDevice(d.deviceId);
+      }
+    } else {
+      Alert.alert(
+        title,
+        message,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Unlink', style: 'destructive', onPress: () => handleRemoveDevice(d.deviceId) }
+        ]
+      );
+    }
+  };
 
   /**
    * Pull-to-refresh handler
@@ -297,8 +455,9 @@ export default function HomeDashboard({ syncKey, onLogout }) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-darkspace mt-10">
-      {currentView === 'feed' ? (
+    <SafeAreaView className="flex-1 bg-darkspace mt-10 items-center">
+      <View className="flex-1 w-full max-w-4xl">
+        {currentView === 'feed' ? (
         <>
           {/* Top Navigation */}
           <View className="flex-row justify-between items-center px-4 py-4 border-b border-slate-900 bg-darkspace">
@@ -307,26 +466,35 @@ export default function HomeDashboard({ syncKey, onLogout }) {
               {/* <View className="w-1.5 h-1.5 rounded-full bg-cyanaccent ml-1" /> */}
             </View>
             <TouchableOpacity 
-              className="px-3 py-1.5 bg-slate-950/60 border border-slate-800/80 rounded-xl active:bg-slate-900 flex-row items-center" 
+              className="px-3 py-1.5 bg-slate-950/60 border border-slate-500/80 rounded-xl active:bg-slate-900 flex-row items-center" 
               onPress={() => setCurrentView('manage')}
             >
-              <Feather name="settings" size={12} color="#00F2FE" className="mr-1" />
-              <Text className="text-xs text-slate-200 font-semibold">Manage</Text>
+              <Feather name="settings" size={16} color="#00F2FE" className="mr-1" />
+              <Text className="text-md text-slate-200 font-semibold">Manage</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Search Input Bar */}
+          {/* Search & Share Input Bar */}
           <View className="flex-row items-center mx-4 mt-4 mb-3 px-3 bg-slate-950/60 border border-slate-600 rounded-xl h-11 focus:border-cyanaccent">
             <Feather name="search" size={14} color="#64748B" />
             <TextInput
               className="flex-1 h-full text-sm text-white ml-2 bg-transparent"
-              placeholder="Search feed..."
+              placeholder="Search or paste content to share..."
               placeholderTextColor="#838d9c"
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoCorrect={false}
               clearButtonMode="while-editing"
+              onSubmitEditing={handlePushPress}
             />
+            {searchQuery.trim().length > 0 && (
+              <TouchableOpacity 
+                className="p-1.5 bg-cyanaccent/20 rounded-lg active:bg-cyanaccent/40 ml-2"
+                onPress={handlePushPress}
+              >
+                <Feather name="arrow-up" size={16} color="#00F2FE" />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* History List Feed */}
@@ -439,8 +607,23 @@ export default function HomeDashboard({ syncKey, onLogout }) {
                       </Text>
                     </View>
                   </View>
-                  <View className="bg-emerald-950/40 rounded-full px-2 py-0.5 border border-emerald-800/40">
-                    <Text className="text-[8px] text-emerald-400 font-bold uppercase tracking-wide">Active</Text>
+                  <View className="flex-row items-center">
+                    {isDeviceActive(d.lastActiveAt) ? (
+                      <View className="bg-emerald-950/40 rounded-full px-2 py-0.5 border border-emerald-800/40 mr-2.5">
+                        <Text className="text-[8px] text-emerald-400 font-bold uppercase tracking-wide">Active</Text>
+                      </View>
+                    ) : (
+                      <View className="bg-slate-950/60 rounded-full px-2 py-0.5 border border-slate-800 mr-2.5">
+                        <Text className="text-[8px] text-slate-400 font-bold uppercase tracking-wide">Inactive</Text>
+                      </View>
+                    )}
+                    <TouchableOpacity 
+                      className="p-1.5 bg-red-950/20 border border-red-950/40 rounded-xl active:bg-red-950/40"
+                      onPress={() => confirmRemoveDevice(d)}
+                      title="Remove device"
+                    >
+                      <Feather name="trash-2" size={12} color="#ef4444" />
+                    </TouchableOpacity>
                   </View>
                 </View>
               ))}
@@ -470,9 +653,9 @@ export default function HomeDashboard({ syncKey, onLogout }) {
     </View>
     <Text className="text-xl font-bold text-white tracking-tight">QuickPipe</Text>
     <Text className="text-[10px] font-bold text-slatemuted uppercase tracking-wider mt-1 bg-slate-900 border border-slate-800/60 rounded-full px-2.5 py-0.5">
-      v1.0.0 • Open Source
+      v1.0.1 • Open Source
     </Text>
-    <Text className="text-xs text-cyanaccent italic mt-2.5 text-center px-4">
+    <Text className="text-sm text-cyanaccent italic mt-2.5 text-center px-4">
       "The fastest pipeline for your links and text."
     </Text>
   </View>
@@ -618,6 +801,7 @@ export default function HomeDashboard({ syncKey, onLogout }) {
           </ScrollView>
         </>
       )}
+      </View>
 
       {/* Custom absolute feedback toast */}
       {feedbackMsg ? (

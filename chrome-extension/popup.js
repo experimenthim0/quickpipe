@@ -353,14 +353,22 @@ async function fetchHistory(searchQuery = '') {
 
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error('History download response failure');
+      if (response.status === 404 || response.status === 401) {
+        // Sync key was invalid or deleted from the backend. Force logout.
+        console.warn('SyncKey is invalid or expired. Forcing logout.');
+        await chrome.storage.local.remove('syncKey');
+        cachedSyncKey = '';
+        showOnboardingView();
+        return;
+      }
+      throw new Error(`History download failed: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
     renderHistoryItems(data.links);
   } catch (error) {
     console.error('Fetch history error:', error);
-    historyList.innerHTML = `<li class="empty-state"><span class="empty-icon">⚠️</span><span class="empty-text">Failed to sync feed.</span></li>`;
+    historyList.innerHTML = `<li class="empty-state" style="flex-direction: column;"><span class="empty-icon">⚠️</span><span class="empty-text">Failed to sync feed.</span><span style="font-size:10px; color:var(--text-muted); margin-top:4px; text-align:center;">Check your connection or ensure the API server is running.</span></li>`;
   } finally {
     loadingSpinner.style.display = 'none';
   }

@@ -32,10 +32,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.set('trust proxy', 1);
+
 // API Rate Limiting Configuration — 10 requests per 30-minute window
 const apiLimiter = rateLimit({
-  windowMs: 30 * 60 * 1000, // 30 minutes
-  max: 10, // Limit each IP to 10 requests per window
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 20, // Limit each IP to 10 requests per window
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: { error: 'Too many requests from this IP, please try again after 30 minutes.' }
@@ -43,11 +45,11 @@ const apiLimiter = rateLimit({
 
 // Auth specific rate limiter (prevent OTP brute-force/spam)
 const authLimiter = rateLimit({
-  windowMs: 30 * 60 * 1000, // 30 minutes
+  windowMs: 10 * 60 * 1000, // 10 minutes
   max: 3, // Limit each IP to 3 OTP requests per window (strict for auth)
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many login attempts. Please try again after 30 minutes.' }
+  message: { error: 'Too many login attempts. Please try again after 10 minutes.' }
 });
 
 // Apply rate limiting routes
@@ -114,7 +116,7 @@ app.use((err, req, res, _next) => {
 const server = app.listen(PORT, () => {
   console.log(`======================================================`);
   console.log(`🚀 QuickPipe API server listening on port: ${PORT}`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}`);
+  // console.log(`🔗 API Base URL: http://localhost:${PORT}`);
   console.log(`📦 Environment: ${NODE_ENV}`);
   console.log(`======================================================`);
 });

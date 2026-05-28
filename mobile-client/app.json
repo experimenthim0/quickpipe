@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "QuickPipe",
+    "slug": "quickpipe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#090D16"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.quickpipe.app"
+    },
+    "android": {
+      "package": "com.quickpipe.app",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.DETECT_SCREEN_CAPTURE"
+      ]
+    }
+  }
+}

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickPipe</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <h1 class="logo-text">QuickPipe</h1>
+      </div>
+      <div class="header-actions">
+        <div id="header-sync-key-container" class="sync-key-pill" style="display: none;" title="Click to copy syncKey">
+          <code id="display-sync-key">SETU-XXXX-XXXX</code>
+        </div>
+        <button id="info-btn" class="icon-btn" title="About QuickPipe">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </button>
+        <button id="logout-btn" class="icon-btn" title="Unlink syncKey" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16 13v-2H7V9l-5 4 5 4v-2h9zM20 3h-9c-1.1 0-2 .9-2 2v4h2V5h9v14h-9v-4H9v4c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Onboarding State -->
+    <div id="onboarding-view" class="view-panel">
+      <div class="hero-graphic">🎛️</div>
+      <h2 class="view-title">Connect QuickPipe</h2>
+      <p class="view-subtitle">Enter your unique syncKey (e.g., SETU-XXXX-XXXX) to pair this browser.</p>
+
+      <form id="onboarding-form">
+        <div class="input-group">
+          <input type="text" id="sync-key-input" placeholder="SETU-XXXX-XXXX" required autocomplete="off" />
+        </div>
+        <button type="submit" class="btn btn-primary">Link Device</button>
+      </form>
+
+      <!-- Shortcut hint shown on onboarding so users learn it early -->
+      <div class="shortcut-hint">
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"></path>
+        </svg>
+        <span>Once connected, press <kbd>Alt</kbd><span class="kbd-plus">+</span><kbd>S</kbd> on any page to instantly pipe the link.</span>
+      </div>
+
+      <div class="onboarding-footer">
+        Don't have a syncKey? Sign in or register on the mobile client.
+      </div>
+    </div>
+
+    <!-- Dashboard State (Authenticated) -->
+    <div id="dashboard-view" class="view-panel" style="display: none;">
+
+      <!-- Quick Action: Push Current Page -->
+      <div class="push-action-row">
+        <button id="push-tab-btn" class="btn btn-action">
+          <span class="btn-icon">⚡</span>
+          Push Current Tab
+        </button>
+        <!-- Keyboard shortcut badge -->
+        <div class="shortcut-badge" title="Keyboard shortcut: Alt+S">
+          <kbd>Alt</kbd><span class="kbd-plus">+</span><kbd>S</kbd>
+        </div>
+      </div>
+
+      <!-- Search & Paste Bar -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search or paste content..." autocomplete="off">
+        <button id="paste-push-btn" class="paste-icon-btn" title="Paste & Push from Clipboard">📋</button>
+      </div>
+
+      <!-- Copy Alert Toast -->
+      <div id="copy-toast" class="toast">Copied to clipboard!</div>
+
+      <!-- History List -->
+      <div class="history-container">
+        <div id="loading-spinner" class="spinner" style="display: none;">
+          <div class="double-bounce1"></div>
+          <div class="double-bounce2"></div>
+        </div>
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <div class="empty-icon">📂</div>
+          <p class="empty-text">No synced links found.</p>
+        </div>
+        <ul id="history-list" class="history-list">
+          <!-- Dynamically populated -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- About / Open Source Project View -->
+    <div id="about-view" class="view-panel" style="display: none;">
+      <div class="about-header">
+        <button id="about-back-btn" class="back-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back</span>
+        </button>
+        <span class="about-title">About QuickPipe</span>
+      </div>
+
+      <div class="about-content">
+        <!-- Brand Card -->
+        <div class="about-brand-card">
+          <div class="about-brand-info">
+            <h3 class="about-brand-name">QuickPipe</h3>
+            <span class="about-brand-version">v1.0.0 • Open Source</span>
+          </div>
+        </div>
+        <p class="about-quote">"The fastest pipeline for your links and text."</p>
+
+        <!-- Shortcut Card -->
+        <div class="about-card shortcut-card">
+          <div class="about-section-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#00F2FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"></path>
+            </svg>
+            <span class="about-section-title">Keyboard Shortcut</span>
+          </div>
+          <div class="shortcut-showcase">
+            <div class="shortcut-keys-large">
+              <kbd class="kbd-large">Alt</kbd>
+              <span class="kbd-plus-large">+</span>
+              <kbd class="kbd-large">S</kbd>
+            </div>
+            <p class="shortcut-desc">Press on any tab to instantly push the current page URL to your QuickPipe feed — no popup needed.</p>
+          </div>
+        </div>
+
+        <!-- Mission -->
+        <div class="about-card">
+          <div class="about-section-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#00F2FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+            <span class="about-section-title">The Mission</span>
+          </div>
+          <p class="about-text">
+            QuickPipe was born out of a simple, daily frustration: the annoying friction of messaging yourself on WhatsApp just to move a link or text snippet between your laptop and your phone.
+          </p>
+          <p class="about-text mt-2">
+            We stripped away the heavy bloat of traditional device sync tools to build a dedicated, lightning-fast data pipeline that protects your focus and logs your history in a clean, searchable feed.
+          </p>
+        </div>
+
+        <!-- Architecture -->
+        <div class="about-card">
+          <div class="about-section-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#00F2FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            <span class="about-section-title">Architecture</span>
+          </div>
+          <ul class="about-list">
+            <li><span class="list-dot"></span> <strong>Backend:</strong> Node.js, Express, MongoDB</li>
+            <li><span class="list-dot"></span> <strong>Mobile App:</strong> React Native (Android 16 UI)</li>
+            <li><span class="list-dot"></span> <strong>Desktop:</strong> Chrome Extension (MV3 Service)</li>
+          </ul>
+        </div>
+
+        <!-- Developer -->
+        <div class="about-card">
+          <div class="about-section-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#00F2FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            <span class="about-section-title">Developed By</span>
+          </div>
+          <div class="dev-info">
+            <p class="dev-name">Nikhil Yadav</p>
+            <p class="dev-tagline">"Building tools at the intersection of infrastructure, automation, and clean code."</p>
+            <a href="https://nikhim.me" target="_blank" class="dev-link-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#00F2FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span>nikhim.me</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="#00F2FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Open Source -->
+        <div class="about-card">
+          <div class="about-section-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#00F2FE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span class="about-section-title">Open Source</span>
+          </div>
+          <p class="about-text mb-3">
+            QuickPipe is completely open source and built for the developer community.
+          </p>
+          <div class="about-links-stack">
+            <a href="https://github.com" target="_blank" class="about-action-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+              <span>View Repository on GitHub</span>
+            </a>
+            <a href="https://github.com" target="_blank" class="about-action-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Report Issue / Request Feature</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Heart Footer -->
+        <div class="about-footer-text">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#ef4444" viewBox="0 0 24 24" style="margin-right: 4.5px;">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          <span>Made with love</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "QuickPipe",
+  "version": "1.0.0",
+  "description": "Minimalist, instant cross-device link sharing pipeline.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "identity"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "QuickPipe Feed",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "commands": {
+    "push-current-tab": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "windows": "Alt+S",
+        "mac": "Alt+S"
+      },
+      "description": "Instantly push current tab URL to your device sync pipeline"
+    }
+  }
+}

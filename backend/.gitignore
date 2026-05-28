@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment & Secrets
+*.env
+.env.*
+
+# Build outputs
+dist/
+build/
+*.apk
+*.aab
+*.ipa
+
+# Expo
+.expo/
+web-build/
+
+# Android build cache
+.gradle/
+*.hprof
+local.properties
+
+# IDE & Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Source icon assets (already copied to targets)
+AppIcons/
+icons/
+
+# Project notes (private)
+idea.md
+linksetu_project_specification.pdf
+
+# Packaged artifacts
+*.zip
